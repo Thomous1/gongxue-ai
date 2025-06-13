@@ -107,6 +107,7 @@ async def query(
             qa_chain = ConversationalRetrievalChain.from_llm(
                 llm=llm,
                 retriever=vectorstore.as_retriever(search_kwargs={"k": 3}),
+                return_source_documents=True , # 返回来源文档用于溯源
                 memory=memory
             )
 
@@ -128,8 +129,8 @@ async def query(
     sources = []
 
     # 可选：从文档中提取来源
-    # if "source_documents" in result:
-    #     sources = [doc.page_content[:100] for doc in result["source_documents"]]
+    if "source_documents" in result:
+        sources = [doc.page_content[:100] for doc in result["source_documents"]]
 
     return {"answer": answer, "sources": sources}
 
