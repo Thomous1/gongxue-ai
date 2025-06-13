@@ -1,6 +1,8 @@
 一、简介：
 1、本文以宫教授ppt作为文档实现RAG功能
+
 2、使用fastAPI作为web框架
+
 3、使用langchain集成本地ollama deepseek模型，使用chroma作为向量数据库存储
 
 二、postman 请求示例：
@@ -14,6 +16,7 @@ curl --location --request POST 'http://localhost:8001/query' \
 
 三、 服务请求需本地按照ollama，需本地模型部署
  ollama list
+
 NAME                  ID              SIZE      MODIFIED       
 qwen2.5:latest        845dbda0ea48    4.7 GB    11 minutes ago    
 llava:7b              8dd30f6b0cb1    4.7 GB    22 hours ago      
