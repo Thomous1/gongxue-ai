@@ -14,7 +14,7 @@ import json
 from starlette.responses import StreamingResponse
 
 # 初始化应用
-app = FastAPI(title="宫学研习社")
+app = FastAPI(title="宫学研习社",debug=True)
 
 # 配置安全
 API_KEY = "test"
@@ -93,7 +93,9 @@ async def query(
     qa_chain = ConversationalRetrievalChain.from_llm(
         llm=llm,
         retriever=vectorstore.as_retriever(search_kwargs={"k": 3}),
+        #return_source_documents=True,  # 返回来源文档用于溯源
         memory=memory
+        #output_key="answer"
     )
 
     # 处理流式输出
@@ -101,14 +103,18 @@ async def query(
         def stream_generator():
             # 自定义回调处理器
             callback = StreamingCallbackHandler()
-            llm = Ollama(model="llama2", temperature=0.1, callbacks=[callback])
+            llm = Ollama(model="deepseek-r1:8b",  # 模型名称（与ollama list显示的一致）
+                         temperature=0.7,  # 生成文本的随机性（0-1）
+                         base_url="http://localhost:11434", # Ollama API地址（默认）
+                         callbacks=[callback])
 
             # 重新创建链
             qa_chain = ConversationalRetrievalChain.from_llm(
                 llm=llm,
                 retriever=vectorstore.as_retriever(search_kwargs={"k": 3}),
-                return_source_documents=True , # 返回来源文档用于溯源
+                #return_source_documents=True , # 返回来源文档用于溯源
                 memory=memory
+                #output_key="answer"
             )
 
             # 执行查询
@@ -116,7 +122,7 @@ async def query(
 
             # 发送最后的令牌
             if callback.token_buffer:
-                yield f"data: {json.dumps({'token': callback.token_buffer})}\n\n"
+                yield f"data: {json.dumps({'token': callback.token_buffer})} \n\n"
             yield "data: [DONE]\n\n"
 
         return StreamingResponse(stream_generator(), media_type="text/event-stream")
